@@ -6,6 +6,8 @@ import WagonListHeader from "../components/headers/WagonListHeader";
 import WagonRow from "../components/rows/WagonRow";
 import { wagonService } from "../../lib/services";
 import WagonDetailView from "./detail-view";
+import WagonCreateForm from "../components/form/WagonCreateForm";
+import WagonUpdateForm from "../components/form/WagonUpdateForm";
 
 
 type Wagon = {
@@ -64,6 +66,8 @@ export default function WagonsPage() {
           getOne={wagonService.getOne.bind(wagonService)}
           HeaderComponent={WagonListHeader}
           RowComponent={WagonRow}
+          CreateFormComponent={WagonCreateForm}
+          UpdateFormComponent={WagonUpdateForm}
           itemsPerPage={20}
           searchPlaceholder="جستجو واگن با شناسه..."
         />
