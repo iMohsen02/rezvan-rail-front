@@ -5,6 +5,8 @@ import ProductListHeader from "../components/headers/ProductListHeader";
 import ProductRow from "../components/rows/ProductRow";
 import { productService } from "../../lib/services";
 import ProductDetailView from "./detail-view";
+import ProductCreateForm from "../components/form/ProductCreateForm";
+import ProductUpdateForm from "../components/form/ProductUpdateForm";
 
 export default function ProductsPage() {
   return (
@@ -15,6 +17,8 @@ export default function ProductsPage() {
         getOne={productService.getOne.bind(productService)}
         HeaderComponent={ProductListHeader}
         RowComponent={ProductRow}
+        CreateFormComponent={ProductCreateForm}
+        UpdateFormComponent={ProductUpdateForm}
         itemsPerPage={12}
         searchPlaceholder="جستجو محصول با شناسه..."
       />

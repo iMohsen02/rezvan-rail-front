@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { ComponentType, KeyboardEvent } from "react";
+import FormModal from "./FormModal";
 import { Search } from "lucide-react";
 
 interface ItemListProps<T> {
@@ -9,8 +11,10 @@ interface ItemListProps<T> {
   getOne: (id: string) => Promise<{ data: T }>;
   
   // Components
-  HeaderComponent: React.ComponentType;
-  RowComponent: React.ComponentType<{ item: T }>;
+  HeaderComponent: ComponentType;
+  RowComponent: ComponentType<{ item: T }>;
+  CreateFormComponent?: ComponentType<{ onSuccess?: () => void }>;
+  UpdateFormComponent?: ComponentType<{ item: T; onSuccess?: () => void }>;
   
   // Configuration
   itemsPerPage?: number;
@@ -22,6 +26,8 @@ export default function ItemList<T extends { _id: string }>({
   getOne,
   HeaderComponent,
   RowComponent,
+  CreateFormComponent,
+  UpdateFormComponent,
   itemsPerPage = 10,
   searchPlaceholder = "جستجو با شناسه..."
 }: ItemListProps<T>) {
@@ -31,6 +37,8 @@ export default function ItemList<T extends { _id: string }>({
   const [error, setError] = useState<string | null>(null);
   const [searchId, setSearchId] = useState("");
   const [searchResult, setSearchResult] = useState<T | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [editingItem, setEditingItem] = useState<T | null>(null);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,7 +106,7 @@ export default function ItemList<T extends { _id: string }>({
   }, []);
 
   // Handle search on Enter key
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
@@ -106,6 +114,13 @@ export default function ItemList<T extends { _id: string }>({
 
   return (
     <div className="space-y-6">
+      {/* Actions */}
+      <div className="flex items-center justify-between">
+        <div />
+        {CreateFormComponent && (
+          <button onClick={() => setShowCreate(true)} className="btn-primary px-4 py-2">ایجاد جدید</button>
+        )}
+      </div>
       {/* Search Section */}
       <div className="card p-4">
         <div className="flex gap-3">
@@ -180,7 +195,17 @@ export default function ItemList<T extends { _id: string }>({
           ) : (
             <div>
               {items.map((item) => (
-                <RowComponent key={item._id} item={item} />
+                <div key={item._id} className="relative group">
+                  {UpdateFormComponent && (
+                    <button
+                      className="absolute left-2 top-2 z-10 opacity-0 group-hover:opacity-100 btn-ghost text-xs px-2 py-1"
+                      onClick={(ev) => { ev.stopPropagation(); setEditingItem(item); }}
+                    >
+                      ویرایش
+                    </button>
+                  )}
+                  <RowComponent item={item} />
+                </div>
               ))}
             </div>
           )}
@@ -260,6 +285,16 @@ export default function ItemList<T extends { _id: string }>({
             </button>
           </div>
         </div>
+      )}
+      {showCreate && CreateFormComponent && (
+        <FormModal title="ایجاد جدید" onClose={() => setShowCreate(false)}>
+          <CreateFormComponent onSuccess={() => { setShowCreate(false); loadItems(1); }} />
+        </FormModal>
+      )}
+      {editingItem && UpdateFormComponent && (
+        <FormModal title="ویرایش" onClose={() => setEditingItem(null)}>
+          <UpdateFormComponent item={editingItem} onSuccess={() => { setEditingItem(null); loadItems(currentPage); }} />
+        </FormModal>
       )}
     </div>
   );
